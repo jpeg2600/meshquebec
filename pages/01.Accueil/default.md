@@ -28,7 +28,7 @@ Notre communauté s’intéresse aux réseaux **LoRa Mesh** ouverts, résilients
 - Participez aux discussions techniques et aux projets locaux  
 - Découvrez des tutoriels et guides adaptés à tous les niveaux  
 - Contribuez au déploiement du réseau mesh dans votre région  
-- <a href="https://www.facebook.com/groups/meshtasticquebec" target="_blank">Rejoignez-nous sur **Facebook – Meshtastic Québec** <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" width="28" style="vertical-align:middle; margin-right:6px;" /> </a>
+
 ---
 
 ## 🌐 Pourquoi Meshtastic?
@@ -36,3 +36,5 @@ Notre communauté s’intéresse aux réseaux **LoRa Mesh** ouverts, résilients
 - Portée de plusieurs kilomètres  
 
 ---
+
+<a href="https://www.facebook.com/groups/meshtasticquebec" target="_blank">Rejoignez-nous sur **Facebook – Meshtastic Québec** <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" width="28" style="vertical-align:middle; margin-right:6px;" /> </a>

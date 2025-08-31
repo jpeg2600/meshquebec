@@ -1,0 +1,161 @@
+{% set navbar_style = theme_var('navbar_style') %}
+{% set navbar_bg = theme_var('navbar_bg') %}
+{% set navbar_bg_color = theme_var('navbar_bg_color') %}
+{% set navbar_position = theme_var('navbar_position') %}
+{% set navbar_breakpoint = theme_var('navbar_breakpoint') %}
+{% set arrayofpath = uri.path|split('/') %}
+{% set firstfolderofpath = arrayofpath[1] %}
+{% set secondfolderofpath = arrayofpath[2] %}
+
+{# MultiCourse hub compatibility - hibbittsdesign.org #}
+{% if page.find('/' ~ firstfolderofpath).template == 'course' or page.find('/' ~ firstfolderofpath).template == 'subsite' %}
+    {% if page.find('/' ~ firstfolderofpath ).header.navbar_bg_color %}
+      {% set navbar_bg_color = page.find('/' ~ firstfolderofpath ).header.navbar_bg_color %}
+    {% endif %}
+    {% set course_home = page.find('/' ~ firstfolderofpath ).header.course_home %}
+    {% if course_home is empty %}
+        {% set course_home = page.find('/' ~ firstfolderofpath ).header.subsite_home %}
+    {% endif %}
+    {% if course_home is empty %}
+        {% set course_home = config.system.home.alias %}
+    {% endif %}
+    {% if firstfolderofpath %}
+      {% if not (firstfolderofpath in base_url) %}
+        {% set base_url = base_url ~ '/' ~ firstfolderofpath ~ '/' ~ course_home %}
+      {% endif %}
+    {% endif %}
+    {% if page.find('/' ~ firstfolderofpath).routable %}
+      {% set site_title = page.find('/' ~ firstfolderofpath ).title %}
+    {% else %}
+      {% set site_title = page.find('/' ~ firstfolderofpath ).title|upper %}
+    {% endif %}
+    {% set background_image = page.find('/' ~ firstfolderofpath ~ '/headerimage').media.images|first %}
+    {% if background_image == empty %}
+      {% set background_image = page.find('/headerimage').media.images|first %}
+    {% endif %}
+    {% set pages = page.evaluate([{'@page.children':'/' ~ firstfolderofpath }]) %}
+{% elseif page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath).template == 'course' or page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath).template == 'subsite' %}
+    {% if page.find('/' ~ firstfolderofpath ).header.navbar_bg_color %}
+      {% set navbar_bg_color = page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath).header.navbar_bg_color %}
+    {% endif %}
+    {% set course_home = page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath).header.course_home %}
+    {% if course_home is empty %}
+        {% set course_home = page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath).header.subsite_home %}
+    {% endif %}
+    {% if course_home is empty %}
+        {% set course_home = config.system.home.alias %}
+    {% endif %}
+    {% if not (firstfolderofpath ~ '/' ~ secondfolderofpath in base_url) %}
+      {% set base_url = base_url ~ '/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath ~ '/' ~ course_home %}
+    {% endif %}
+    {% set site_title = page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath).header.course_site_title %}
+    {% if site_title is empty %}
+      {% set site_title = page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath).header.subsite_site_title %}
+    {% endif %}
+    {% if site_title is empty %}
+      {% set site_title = page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath).title %}
+    {% endif %}
+    {% set background_image = page.find('/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath ~ '/headerimage').media.images|first %}
+    {% if background_image == empty %}
+      {% set background_image = page.find('/headerimage').media.images|first %}
+    {% endif %}
+    {% set pages = page.evaluate([{'@page.children':'/' ~ firstfolderofpath ~ '/' ~ secondfolderofpath}]) %}
+{% else %}
+  {% set site_title = site.title|e('html') %}
+  {% set background_image = page.find('/headerimage').media.images|first %}
+  {% set pages = pages.children.visible %}
+{% endif %}
+
+{% if background_image and not(navbar_position == 'fixed-bottom') %}
+  <div class="myheader" style="background-image: url({{ background_image.url }});"></div>
+{% endif %}
+
+{% if navbar_bg_color %}
+    {% set navbar_bg_color = "style=\"background-color: #{navbar_bg_color}\"" %}
+    {% set navbar_bg = '' %}
+{% elseif navbar_bg and navbar_bg != 'default' %}
+    {% set navbar_bg_color = '' %}
+{% else %}
+    {% set navbar_bg = 'bg-primary' %}
+    {% set navbar_bg_color = '' %}
+{% endif %}
+
+<nav class="navbar {{ navbar_position }} navbar-expand-{{ navbar_breakpoint }} {{ navbar_style }} {{ navbar_bg }}" {{ navbar_bg_color|raw }};" role="navigation">
+    <div class="container">
+        <a class="navbar-brand" href="{{ base_url == '' ? '/' : base_url }}">{{ site_title }}</a>
+        {% if (pages|first) or (theme_var('display_of_git_sync_repo_link') == 'menu' or theme_var('display_of_git_sync_repo_link') == empty) %}
+          <button type="button" class="navbar-toggler" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+        {% endif %}
+
+        <div class="navbar-collapse collapse justify-content-end">
+            <ul class="navbar-nav">
+
+              {% for page in pages %}
+                {% if page.visible %}
+                  {# Set all pages to use active page style - hibbittsdesign.org#}
+                  {% set current_page = 'active' %}
+                  {% if theme_var('dropdown.enabled') and page.children.visible.count > 0 %}
+                      <li class="nav-item dropdown {{ current_page }}">
+                          <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ page.menu }}</a>
+                          <div class="dropdown-menu">
+                              {% set current_parent = page.active ? 'active' : '' %}
+                              <a href="{{ page.url }}" class="dropdown-item {{ current_parent }}">{{ page.menu }}</a>
+                              <div class="dropdown-divider"></div>
+                              {% for child in page.children.visible %}
+                                  {% set current_child = (child.active or child.activeChild) ? 'active' : '' %}
+                                  <a href="{{ child.url }}" class="dropdown-item {{ current_child }}">{{ child.menu }}</a>
+                              {% endfor %}
+                          </div>
+                      </li>
+                  {% else %}
+                    {% if not (page.find('/' ~ page.slug).template == 'course' or page.find('/' ~ page.slug).template == 'subsite' or page.find('/' ~ page.slug).template == 'coursegroup' or page.find('/' ~ page.slug).template == 'subsitegroup') %}
+                      {% set page_url = page.url %}
+                      {% set page_menu = page.menu %}
+                      <li class="nav-item {{ current_page }}"><a class="nav-link" href="{{ page_url }}" {% if page.header.menu_target %} target="{{ page.header.menu_target }}" {% endif %}>{% if page.header.menu_icon %}<i class="fa fa-{{ page.header.menu_icon }}"></i>{% endif %}{{ page_menu }}</a></li>
+                    {% endif %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+                {% for mitem in site.menu %}
+                    <li class="nav-item active">
+                        {% set icon = mitem.icon ? '<i class="fa fa-fw fa-' ~ mitem.icon ~ '"></i> ' : '' %}
+                        <a class="nav-link" href="{{ mitem.url }}">{{ icon|raw }}{{ mitem.text }}</a>
+                    </li>
+                {% endfor %}
+
+                {# custom menu items check and display - hibbittsdesign.org #}
+                {% if theme_var('displaycustommenus.enabled') %}
+
+                  {% for mitem in theme_var('custommenu') %}
+                    <li class="nav-item active" >
+                      {% if mitem.target == "_blank" %}
+                        {% set mclass = 'external-link' %}
+                      {% endif %}
+                      <a class="nav-link {{mclass}}" href="{{ mitem.url }}" target="{{ mitem.target }}">
+                        {% if mitem.icon %}
+                          <i class="fa fa-{{ mitem.icon }}"></i>{{ mitem.text }}
+                        {% else %}
+                          {{ mitem.text }}
+                        {% endif %}
+                      </a>
+                    </li>
+                  {% endfor %}
+                {% endif %}
+
+                {# check to display git sync link in menu - hibbittsdesign.org #}
+                {% if theme_var('display_of_git_sync_repo_link') == 'menu' or theme_var('display_of_git_sync_repo_link') == empty %}
+                  <li class="nav-item active" >
+                      {% include 'partials/git_sync_repo_link.html.twig' with {linkinmenu: true} %}
+                  </li>
+                {% endif %}
+
+                {% if config.plugins.login.enabled and grav.user.username %}
+                    <li class="nav-item"><span class="nav-link"><i class="fa fa-lock"></i> {% include 'partials/login-status.html.twig' %}</span></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,206 @@
+<div class="list-item">
+
+    {% set header_image = page.header.header_image|defined(true) %}
+    {# changed default image width and height - hibbittsdesign.org #}
+    {% set header_image_width  = page.header.header_image_width|defined(1200) %}
+    {% set header_image_height = page.header.header_image_height|defined(400) %}
+    {% set header_image_file = page.header.header_image_file %}
+
+    <div class="list-blog-header">
+
+        {% if page.header.link %}
+            <h2>
+              {% if page.header.continue_link is not same as(false) %}
+                  <a href="{{ page.header.link }}"><i class="fa fa-angle-double-right"></i>{{ page.title }}</a>
+              {% endif %}
+            </h2>
+        {% else %}
+        {# added page title icon - hibbittsdesign.org #}
+        {% if page.header.icon %}
+          {% set titleicon = page.header.icon %}
+        {% else %}
+          {% if config.site.icon.post %}
+            {% set titleicon = page.parent.post_icon %}
+          {% endif %}
+          {% if page.parent.header.post_icon %}
+            {% set titleicon = page.parent.header.post_icon %}
+            {% endif %}
+          {% endif %}
+          {% if not (grav.uri.param('hidepagetitle')) %}
+            <h1>
+            {% if titleicon %}
+              <class="p-name"><a href="{{ page.url }}" class="u-url"><i class="fa fa-{{ titleicon }}"></i>{{ page.title }}</a>
+            {% else %}
+              <class="p-name"><a href="{{ page.url }}" class="u-url">{{ page.title }}</a>
+            {% endif %}
+          </h1>
+          {% else %}
+            <h1 class="hidden">{{page.title}}</h1>
+          {% endif %}
+        {% endif %}
+
+        <div class="list-blog-meta my-3">
+            {% if not (page.parent.header.hide_post_date) %}
+                <span class="list-blog-date">
+                <i class="fa fa-calendar"></i> <span>{{ page.date|date(system.pages.dateformat.short) }}</span>
+              </span>
+            {% endif %}
+
+            {% if not (page.parent.header.hide_post_taxonomy) %}
+              {% if page.taxonomy.tag %}
+              <span class="list-blog-tags float-right">
+                  {% for tag in page.taxonomy.tag %}
+                      <a class="badge badge-primary" href="{{ base_url }}/tag{{ config.system.param_sep }}{{ tag }}">{{ tag }}</a>
+                  {% endfor %}
+              </span>
+              {% endif %}
+            {% endif %}
+
+        </div>
+
+        {% if not (grav.uri.param('hideheaderimage')) %}
+
+        {% if big_header %}
+            {{ page.media.images|first.cropResize(1200,600).html('','blog-header-image') }}
+            {% else %}
+              {% if header_image %}
+              {% if header_image_file %}
+                {% set image_parts = pathinfo(header_image_file) %}
+                {% set image_basename = image_parts.basename %}
+                {% set image_page = image_parts.dirname == '.' ? page : page.find(image_parts.dirname) %}
+                {% set header_image_media = image_page.media[image_basename] %}
+              {% else %}
+                {% set header_image_media = page.media.images|first %}
+              {% endif %}
+
+              {# support image credit tag with optional image meta file - hibbittsdesign.org #}
+              {% if header_image_media %}
+                {% set image_alt_text = page.header.header_image_alt_text %}
+                {% if page.header.header_image_credit %}
+                  {% set image_credit = page.header.header_image_credit %}
+                  {% set image_creditlink = page.header.header_image_creditlink %}
+                {% elseif header_image_media.meta.header_image_credit  %}
+                  {% set image_credit = header_image_media.meta.header_image_credit %}
+                  {% set image_creditlink = header_image_media.meta.header_image_creditlink %}
+                  {% set image_alt_text = header_image_media.meta.header_image_alt_text %}
+                {% endif %}
+                {% if image_credit %}
+                  <div class="image-credit-wrapper"><span class="image-credit">
+                    {% if image_creditlink %}
+                      Image: <a class="newwindow external-link" href="{{ image_creditlink }}">
+                      {{ image_credit }}</a></span>
+                      <img src="{{ header_image_media.cropZoom(header_image_width, header_image_height).url }}" alt="{{ image_alt_text }}"/>
+                    {% else %}
+                      Image: {{ image_credit }}</span>
+                      <img src="{{ header_image_media.cropZoom(header_image_width, header_image_height).url }}" alt="{{ image_alt_text }}"/>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <img src="{{ header_image_media.cropZoom(header_image_width, header_image_height).url }}" alt="{{ image_alt_text }}"/>
+                {% endif %}
+              {% endif %}
+
+              {% endif %}
+            {% endif %}
+
+          {% endif %}
+          </div>
+
+    <div class="list-blog-padding">
+
+      {% if truncate and page.summary != page.content %}
+            <p>{{ page.summary|raw }}</p>
+              {% if page.header.continue_link is not same as(false) %}
+                <p>
+                {% if page.parent.header.continue_link_as_button %}
+                  <a class="btn btn-primary" href="{{ page.url }}">{{ 'BLOG.ITEM.VIEW_ALL_OF'|t }}
+                {% else %}
+                  <a href="{{ page.url }}">{{ 'BLOG.ITEM.VIEW_ALL_OF'|t }}
+                {% endif %}
+                {{ page.title }}<i class="fa fa-chevron-right" aria-hidden="true"></i>
+              </a>
+              </p>
+            {% endif %}
+            <hr>
+        {% elseif truncate %}
+            {% if page.summary != page.content %}
+                <p>{{ page.content|truncate(550) }}</p>
+            {% else %}
+                <p>{{ page.content|raw }}</p>
+            {% endif %}
+            {% if page.header.continue_link is not same as(false) %}
+              <p>
+               {% if page.parent.header.continue_link_as_button %}
+                 <a class="btn btn-primary" href="{{ page.url }}">{{ 'BLOG.ITEM.VIEW_ALL_OF'|t }}
+               {% else %}
+                 <a href="{{ page.url }}">{{ 'BLOG.ITEM.VIEW_ALL_OF'|t }}
+               {% endif %}
+               {{ page.title }}<i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+              </p>
+            {% endif %}
+            <hr>
+        {% else %}
+            {# check to hide post summary on page - hibbittsdesign.org #}
+            {% if page.parent.header.hide_post_summary %}
+              {% set content = page.content | slice(page.summary | length) %}
+            {% else %}
+              {% set content = page.content %}
+            {% endif %}
+
+            {# check summary only flag - hibbittsdesign.org #}
+            {% if not (grav.uri.param('summaryonly') or grav.uri.param('onlysummary')) %}
+              {% if content is not empty  %}
+                    <p>{{ content|raw }}</p>
+              {% else %}
+                  <p>{{ page.summary|raw }}</p>
+              {% endif %}
+
+              {# Creative Commons License -  hibbittsdesign.org #}
+              {% if not (grav.uri.param('chromeless') or grav.uri.param('embedded') or grav.uri.param('standalone')) and not(theme_var('chromeless.enabled')) and (theme_var('cc_license.enabled') and not(page.header.hide_cc_license) and not (grav.uri.param('onlysummary') or grav.uri.param('summaryonly'))) %}
+                <p>{% include 'partials/creative_commons_license.html.twig' %}</p>
+              {% endif %}
+
+              {# Git repository edit link - hibbittsdesign.org #}
+              {% if ( page.header.git_sync_repo_link_display is defined and page.header.git_sync_repo_link_display == 'page' ) or (( theme_var('display_of_git_sync_repo_link') == 'page' and page.header.git_sync_repo_link_display is not defined ) and not (page.header.hide_git_sync_repo_link)) %}
+                <br>
+                <hr>
+                <p>{% include 'partials/git_sync_repo_link_note.html.twig' %}</p>
+              {% endif %}
+
+              {% set show_prev_next = true %}
+
+            {% else %}
+
+              {% if page.header.continue_link is not same as(false) %}
+                <p>{{ page.summary|raw }}</p>
+                <p>
+                {% if page.parent.header.continue_link_as_button %}
+                  <a class="btn btn-primary topwindow external-link" href="{{ page.url ~ '/chromeless:true' }}">{{ 'BLOG.ITEM.VIEW_ALL_OF'|t }}
+                {% else %}
+                  <a class="topwindow external-link" href="{{ page.url ~ '/chromeless:true' }}">{{ 'BLOG.ITEM.VIEW_ALL_OF'|t }}
+                {% endif %}
+                {{ page.title }}
+                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+              </p>
+              {% endif %}
+
+          {% endif %}
+
+        {% endif %}
+
+        {# added check for content display flag - hibbittsdesign.org #}
+        {% if show_prev_next and not (grav.uri.param('chromeless') or grav.uri.param('embedded') or grav.uri.param('standalone') or theme_var('chromeless.enabled')) %}
+            <p class="text-center mt-4">
+                {% if not page.isLast %}
+                    <a class="btn btn-primary" href="{{ page.prevSibling.url }}"><i class="fa fa-chevron-left"></i> {{ 'BLOG.ITEM.PREV_POST'|t }}</a>
+                {% endif %}
+
+                {% if not page.isFirst %}
+                    <a class="btn btn-primary" href="{{ page.nextSibling.url }}">{{ 'BLOG.ITEM.NEXT_POST'|t }} <i class="fa fa-chevron-right"></i></a>
+                {% endif %}
+
+            </p>
+        {% endif %}
+
+    </div>
+</div>

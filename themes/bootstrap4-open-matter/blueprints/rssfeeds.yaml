@@ -1,0 +1,79 @@
+title: Course Hub Page Options
+'@extends':
+    type: default
+    context: blueprints://pages
+
+form:
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+
+      fields:
+
+        rssfeed:
+          type: tab
+          title: RSS Feeds
+
+          fields:
+
+            appearanceoptions:
+                type: section
+                title: Appearance
+                underline: true
+
+            header.rss_feed_limit:
+              type: text
+              size: small
+              label: Max Item Count
+              default: 10
+              validate:
+                required: true
+                type: integer
+                min: 1
+
+            header.rss_feed_pagination:
+              type: toggle
+              label: Pagination
+              highlight: 1
+              default: 1
+              options:
+                1: Enabled
+                0: Disabled
+              validate:
+                type: bool
+
+            header.rss_feed_header_images:
+              type: toggle
+              label: Item Header Images
+              highlight: 1
+              default: 1
+              options:
+                1: Enabled
+                0: Disabled
+              validate:
+                type: bool
+
+            header.rss_feed_preview_paragraphs:
+              type: select
+              size: medium
+              label: Item Preview Paragraphs
+              default: one
+              options:
+                  none: None
+                  one: One (with no formating)
+                  two: Two (with no formating)
+                  all: All (including formating and images)
+
+            header.rss_feed_text_filter:
+              type: text
+              size: medium
+              label: Item Content Text Filter
+              description: Optional text string required for item display.
+
+            additional_rss_feed_info:
+                type: display
+                size: large
+                label: ''
+                markdown: true
+                content: "Note: To add or change RSS Feeds use the **Twig Feeds** Plugin"

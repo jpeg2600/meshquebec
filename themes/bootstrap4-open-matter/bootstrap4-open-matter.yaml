@@ -1,0 +1,16 @@
+navbar_style: navbar-dark
+navbar_position: top
+navbar_breakpoint: md
+git_sync_edit_theme_link_location: none
+
+dropdown:
+  enabled: false
+
+streams:
+ schemes:
+   theme:
+     type: ReadOnlyStream
+     prefixes:
+       '':
+       - themes://bootstrap4-open-matter
+       - themes://bootstrap4
